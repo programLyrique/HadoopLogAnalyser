@@ -2,5 +2,5 @@
 
 all:
 
-ocamlbuild hadoopLogVisual.native
+ocamlbuild -use-ocamlfind hadoopLogVisual.native
 mv hadoopLogVisual.native hadoopLogVisual
