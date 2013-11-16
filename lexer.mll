@@ -13,21 +13,42 @@ let LINE = [^ '\n']* '\n'
 
 let NUM = ['0'-'9']
 let ALPHA =  ['a'-'z' 'A'-'Z' '-' '_' ]
-let WORD = ALPHA (ALPHA | NUM)*
+
 
 let NUMBER = '-'? ['0'-'9']+
 
-let DOT = "."
-let EQUAL = "="
+let DOT = '.'
+let EQUAL = '='
 
-let QUOTE = "\""
+let QUOTE = '\"'
+
+let LEFTPAR = '('
+let RIGHTPAR = ')'
+
+let LEFTBRACK = '['
+let RIGHTBRACK = ']'
+
+let LEFTBRACE = '{'
+let RIGHTBRACE = '}'
+
+let DELIMITER = RIGHTPAR | LEFTPAR | RIGHTBRACK | LEFTBRACK | RIGHTBRACE | LEFTBRACE
+
+(* Miscellaneous characters *)
+let MISCHAR = ['\\'  '_'  '/'  '-'  '$'  '.'] 
+
+let SPACE = ' '
+
+let IDENT = (MISCHAR | DELIMITER | ALPHA | NUM)*
+
+let WORD = (MISCHAR | DELIMITER | ALPHA | NUM | SPACE )* 
 
 
 rule make_token = parse
   | BLANK {make_token lexbuf}
   | eof {Token_EOP}
+  | "Meta" {Token_Tag(LogTypes.Meta)}
   (* Tokens for jobs*)
-  | "Job" {Token_Job}
+  | "Job" {Token_Tag(LogTypes.Job)}
   | "JOBID" {Token_JobId}
   | "JOBNAME" {Token_JobName}
   | "LAUNCH_TIME" {Token_LaunchTime}
@@ -35,7 +56,7 @@ rule make_token = parse
   | "TOTAL_REDUCES" {Token_TotalReduces}
   (* Tokens for tasks, and will be also used for map and
   reduce attempts*)
-  | "Task" {Token_Task}
+  | "Task" {Token_Tag(LogTypes.Task)}
   | "TASKID" {Token_TaskId}
   | "TASK_TYPE" {Token_TaskType}
   | "START_TIME" {Token_StartTime}
@@ -46,17 +67,42 @@ rule make_token = parse
   | "CLEANUP" {Token_Cleanup}
   (* Tokens for map attempts *)
   (* Add the TASK_ATTEMPT_ID ?*)
-  | "MapAttempt" {Token_MapAttempt}
+  | "MapAttempt" {Token_Tag(LogTypes.MapAttempt)}
   | "FINISH_TIME" {Token_FinishTime}
   | "HOSTNAME" {Token_HostName}
   | "TASK_STATUS" {Token_TaskStatus}
   | "COUNTERS" {Token_Counters}
+  | "TASK_ATTEMPT_ID" {Token_TaskAttemptId}
   (* Tokens for reduce attempts *)
-  | "ReduceAttempt" {Token_ReduceAttempt}
+  | "ReduceAttempt" {Token_Tag(LogTypes.ReduceAttempt)}
   (* Tokens for results*)
   | "SUCCESS" { Token_Success }
   | "KILLED" {Token_Killed}
-(* Add info in Counters *) 
+  (* Add info in Counters *) 
+  | QUOTE {Token_Quote}
+  | DOT {Token_Dot}
+  | EQUAL {Token_Equal}
+  | NUMBER 
+      {
+	let s = Lexing.lexeme lexbuf
+	in Token_Number(int_of_string(s))
+      }
+  | WORD 
+      {
+        let s = (Lexing.lexeme lexbuf)
+        in Token_Word(s)
+      }
+  | IDENT 
+      {
+	let s = Lexing.lexeme lexbuf 
+	in Token_Ident(s)
+      }
+  | _ (* Default case : skip the character *)
+      {
+	 make_token lexbuf
+      }
+
+
 
 
 

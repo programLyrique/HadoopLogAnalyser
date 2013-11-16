@@ -1,6 +1,4 @@
-.PHONY: all
+.PHONY: logVis
 
-all:
-
-ocamlbuild -use-ocamlfind hadoopLogVisual.native
-mv hadoopLogVisual.native hadoopLogVisual
+logVis: 
+	ocamlbuild -use-ocamlfind hadoopLogVisual.native &&  mv hadoopLogVisual.native hadoopLogVisual
