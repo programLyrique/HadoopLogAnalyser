@@ -13,7 +13,7 @@
 
 %token <string> Token_Word Token_Ident
 
-%token <LogTypes.tagLog> Token_Tag
+%token <LogTypes.tagLog> Token_Tag 
 
 %token Token_Equal Token_Dot Token_Quote (* Detect quotes directly during lexical analysis ?*)
 
@@ -40,7 +40,7 @@
 use functions as nodes of the tree *)
 
 make_logfile:
-   res = logfile2 Token_EOP { res (make_empty_logFile ())} (* We apply the resulting function tree on an empty "log file " *)
+   res = logfile2 Token_EOP {  res (make_empty_logFile ())} (* We apply the resulting function tree on an empty "log file " *)
 
 (* Read all the lines of the log file *)
 logfile2:

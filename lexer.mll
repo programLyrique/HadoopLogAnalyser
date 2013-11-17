@@ -5,6 +5,8 @@
 open Batteries
 open Parser
 
+exception Error of string
+
 }
 
 let BLANK = [' ' '\t' '\n']
@@ -34,17 +36,16 @@ let RIGHTBRACE = '}'
 let DELIMITER = RIGHTPAR | LEFTPAR | RIGHTBRACK | LEFTBRACK | RIGHTBRACE | LEFTBRACE
 
 (* Miscellaneous characters *)
-let MISCHAR = ['\\'  '_'  '/'  '-'  '$'  '.'] 
+let MISCHAR = ['\\'  '_'  '/'  '-'  '$'  '.' ':'] 
 
 let SPACE = ' '
 
 let IDENT = (MISCHAR | DELIMITER | ALPHA | NUM)*
 
-let WORD = (MISCHAR | DELIMITER | ALPHA | NUM | SPACE )* 
+let WORD = (MISCHAR | DELIMITER | ALPHA | NUM  )* 
 
 
 rule make_token = parse
-  | BLANK {make_token lexbuf}
   | eof {Token_EOP}
   | "Meta" {Token_Tag(LogTypes.Meta)}
   (* Tokens for jobs*)
@@ -97,10 +98,12 @@ rule make_token = parse
 	let s = Lexing.lexeme lexbuf 
 	in Token_Ident(s)
       }
+  | BLANK {make_token lexbuf}
   | _ (* Default case : skip the character *)
       {
-	 make_token lexbuf
-      }
+	raise (Error("Unrecognized characters"))
+     }
+
 
 
 
