@@ -64,6 +64,9 @@ numProperty(Name):
 emptyProperty:
   | Token_Word Token_Equal Token_Quote Token_Word Token_Quote {}
 
+numEmptyProperty:
+  | Token_Word Token_Equal Token_Quote Token_Number Token_Quote {}
+
 informations:
   (* After a Meta tag *)
   | Token_Word { fun  tag logFile -> logFile } (* No information to add *)
@@ -143,12 +146,13 @@ informations:
       fun tag logFile -> logFile
     }
       (* For map and reduce attempts*)
-  | property(Token_TaskType)
+      (* TODO : see how to handle Token_Setup Token_Task ... *)
+  |(* property(Token_TaskType)*) Token_TaskType Token_Equal Token_Quote Token_Setup Token_Quote
     taskId = property(Token_TaskId)
     taskAttemptId = property(Token_TaskAttemptId)
     startTime = numProperty(Token_StartTime)
     emptyProperty (* Tracker name *)
-    emptyProperty (* HTTP port *)
+    numEmptyProperty (* HTTP port *)
     {
       fun tag (LogFile(job, mapHashTable, reduceHashTable)) -> 
 	match tag with

@@ -1,7 +1,7 @@
 (** Some utility functions, to debug *)
 
 
-
+(** Type to string*)
 let taglog_pretty_printer = function
   | LogTypes.Meta -> "Meta"
   | LogTypes.Job -> "Job"
@@ -9,6 +9,7 @@ let taglog_pretty_printer = function
   | LogTypes.ReduceAttempt -> "ReduceAttempt"
   | LogTypes.Task -> "Task"
 
+(** Type to string *)
 let token_pretty_printer token = 
   Parser.(
   "Token_" ^ 
@@ -45,10 +46,18 @@ let token_pretty_printer token =
       | Token_Killed -> "Killed"
   )
 
+(** Print a large representation of the detected tokens*)
 let rec tokenize_all tokenizer lexbuf =
+  let print_token tok =  print_endline ("# : " ^ (token_pretty_printer tok));
+    print_endline ("\t[" ^ (Lexing.lexeme lexbuf) ^"]" ) in
   match (tokenizer lexbuf) with 
-    | Parser.Token_EOP -> print_endline "Fin"
-    | token -> 
-      print_endline ("# : " ^ (token_pretty_printer token));
-      print_endline ("\t[" ^ (Lexing.lexeme lexbuf) ^"]" );
+    | Parser.Token_EOP -> print_token Parser.Token_EOP
+    | token -> print_token token ;
       tokenize_all tokenizer lexbuf
+
+(** All tokens for the input such as the representation will be used by the menhir interpreter*)
+let rec tokenize_interp_all tokenizer lexbuf =
+  let print_token tok = print_string ((token_pretty_printer tok) ^ " ") in
+  match (tokenizer lexbuf) with 
+    | Parser.Token_EOP -> print_token Parser.Token_EOP
+    | token -> print_token token; tokenize_interp_all tokenizer lexbuf
