@@ -106,3 +106,9 @@ type logFile = LogFile of job * (string, mapTask) Hashtbl.t * (string, reduceTas
     | MapAttempt
     | ReduceAttempt
     | Meta
+
+  type taskType =
+    | Setup
+    | Map
+    | Reduce
+    | Cleanup

@@ -36,7 +36,7 @@ let RIGHTBRACE = '}'
 let DELIMITER = RIGHTPAR | LEFTPAR | RIGHTBRACK | LEFTBRACK | RIGHTBRACE | LEFTBRACE
 
 (* Miscellaneous characters *)
-let MISCHAR = ['\\'  '_'  '/'  '-'  '$'  '.' ':'] 
+let MISCHAR = ['\\'  '_'  '/'  '-'  '$'  '.' ':' '*'] 
 
 let SPACE = ' '
 
@@ -62,10 +62,10 @@ rule make_token = parse
   | "TASK_TYPE" {Token_TaskType}
   | "START_TIME" {Token_StartTime}
   | "SPLITS" {Token_Splits}
-  | "MAP" {Token_Map}
-  | "REDUCE" {Token_Reduce}
-  | "SETUP" {Token_Setup}
-  | "CLEANUP" {Token_Cleanup}
+  | "MAP" {Token_Task(LogTypes.Map)}
+  | "REDUCE" {Token_Task(LogTypes.Reduce)}
+  | "SETUP" {Token_Task(LogTypes.Setup)}
+  | "CLEANUP" {Token_Task(LogTypes.Cleanup)}
   (* Tokens for map attempts *)
   (* Add the TASK_ATTEMPT_ID ?*)
   | "MapAttempt" {Token_Tag(LogTypes.MapAttempt)}
@@ -99,9 +99,9 @@ rule make_token = parse
 	in Token_Ident(s)
       }
   | BLANK {make_token lexbuf}
-  | _ (* Default case : skip the character *)
+  | _ as c (* Default case : skip the character *)
       {
-	raise (Error("Unrecognized characters"))
+	raise (Error("Unrecognized character : " ^ (Char.escaped c) ))
      }
 
 

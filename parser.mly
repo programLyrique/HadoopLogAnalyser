@@ -15,6 +15,8 @@
 
 %token <LogTypes.tagLog> Token_Tag 
 
+%token <LogTypes.taskType> Token_Task
+
 %token Token_Equal Token_Dot Token_Quote (* Detect quotes directly during lexical analysis ?*)
 
 %token  Token_JobId Token_JobName
@@ -23,8 +25,8 @@
 
 %token  Token_TaskId Token_TaskType Token_TaskAttemptId
 
-%token Token_StartTime Token_Splits Token_Map
-%token Token_Reduce Token_Setup Token_Cleanup
+%token Token_StartTime Token_Splits 
+(*%token Token_Map Token_Reduce Token_Setup Token_Cleanup*)
 
 %token  Token_FinishTime Token_HostName
 %token Token_TaskStatus Token_Counters
@@ -67,18 +69,21 @@ emptyProperty:
 numEmptyProperty:
   | Token_Word Token_Equal Token_Quote Token_Number Token_Quote {}
 
+taskProperty:
+  | Token_TaskType Token_Equal Token_Quote x = Token_Task Token_Quote { x }
+
 informations:
   (* After a Meta tag *)
-  | Token_Word { fun  tag logFile -> logFile } (* No information to add *)
+  | numEmptyProperty { fun  tag logFile -> logFile } (* No information to add *)
   (* After a Job tag  : general info*)
-  | Token_JobId Token_Equal Token_Quote id = Token_Word Token_Quote 
-    Token_JobName Token_Equal Token_Quote name = Token_Word Token_Quote
-    Token_Ident Token_Equal Token_Quote Token_Word Token_Quote
-    Token_Ident Token_Equal Token_Quote Token_Word Token_Quote
-    Token_Ident Token_Equal Token_Quote Token_Word Token_Quote
-    Token_Ident Token_Equal Token_Quote Token_Word Token_Quote
-    Token_Ident Token_Equal Token_Quote Token_Word Token_Quote
-    Token_Ident Token_Equal Token_Quote Token_Word Token_Quote
+  | id = property(Token_JobId) (*Token_JobId Token_Equal Token_Quote id = Token_Word Token_Quote*) 
+    name = property(Token_JobName) (*Token_JobName Token_Equal Token_Quote name = Token_Word Token_Quote*)
+    emptyProperty (*Token_Word Token_Equal Token_Quote Token_Word Token_Quote*)
+    numEmptyProperty (* SUBMIT_TIME *)
+    emptyProperty 
+    emptyProperty
+    emptyProperty
+    emptyProperty 
     {
       fun  tag (LogFile(job, mapHashTable, reduceHashTable)) -> 
 	LogFile({jobId = id ;
@@ -95,8 +100,8 @@ informations:
 	 reduceHashTable)
     }
   (* Info about priority of the job *)
-  | Token_JobId Token_Equal Token_Quote id = Token_Word Token_Quote
-    Token_Ident Token_Equal Token_Quote Token_Word Token_Quote
+  | property(Token_JobId) (*Token_JobId Token_Equal Token_Quote id = Token_Word Token_Quote*)
+    emptyProperty (*Token_Word Token_Equal Token_Quote Token_Word Token_Quote*)
     {
       fun tag logFile -> logFile (* don't do anything *)
     }
@@ -105,7 +110,7 @@ informations:
     Token_LaunchTime Token_Equal Token_Quote launchTime = Token_Number Token_Quote
     Token_TotalMaps Token_Equal Token_Quote nbTotalMaps = Token_Number Token_Quote
     Token_TotalReduces Token_Equal Token_Quote nbTotalReduces = Token_Number Token_Quote
-    Token_Ident Token_Equal Token_Quote Token_Word Token_Quote (* JobStatus *)
+    Token_Word Token_Equal Token_Quote Token_Word Token_Quote (* JobStatus *)
     {
      fun  tag (LogFile(job, mapHashTable, reduceHashTable)) -> 
        LogFile({jobId = id ; (* Verify whether it is the same id *)
@@ -147,7 +152,7 @@ informations:
     }
       (* For map and reduce attempts*)
       (* TODO : see how to handle Token_Setup Token_Task ... *)
-  |(* property(Token_TaskType)*) Token_TaskType Token_Equal Token_Quote Token_Setup Token_Quote
+  | taskProperty (* Token_TaskType Token_Equal Token_Quote x = Token_Task Token_Quote*)
     taskId = property(Token_TaskId)
     taskAttemptId = property(Token_TaskAttemptId)
     startTime = numProperty(Token_StartTime)
