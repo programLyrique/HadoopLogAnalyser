@@ -1,0 +1,4 @@
+Meta VERSION="1" .
+Job JOBID="job_201210041922_0001" JOBNAME="sorter" USER="bmemishi" SUBMIT_TIME="1349371719790" JOBCONF="hdfs://griffon-55\.nancy\.grid5000\.fr:9000/tmp/hadoop-bmemishi/mapred/staging/bmemishi/\.staging/job_201210041922_0001/job\.xml" VIEW_JOB="*" MODIFY_JOB="*" JOB_QUEUE="default" .
+Job JOBID="job_201210041922_0001" JOB_PRIORITY="NORMAL" .
+Job JOBID="job_201210041922_0001" LAUNCH_TIME="1349371720231" TOTAL_MAPS="313" TOTAL_REDUCES="36" JOB_STATUS="PREP" .
