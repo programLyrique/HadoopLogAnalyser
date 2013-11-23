@@ -11,8 +11,9 @@ type job = { jobId : string ; jobName : string ; nbMaps : int ;
 	     nbSuccessSpecReduces : int 
 	   }
 
-type typeTask = Normal | Speculated
-type resultTask = Failed | Success
+
+type sortOfTask = Normal | Speculated (* != taskType *)
+type resultTask = Killed | Failed | Success
 
 type mapTask = { jobId : string ;
 		 mapId : string ;
@@ -22,9 +23,10 @@ type mapTask = { jobId : string ;
 		 mapNbInputRecords : int;
 		 mapNbOutputRecords : int;
 		 mapHost : string ; 
+		 (* What is exactly data distribution ? *)
 		 mapDataDistribution : string list;
 		 mapStatus : resultTask;
-		 mapType : typeTask
+		 mapType : sortOfTask
 	       }
 
 type reduceTask = { jobId : string ;
@@ -42,7 +44,7 @@ type reduceTask = { jobId : string ;
 		    reduceBytesRead : int;
 		    reduceHost : string ;
 		    reduceStatus : resultTask;
-		    reduceType : typeTask;
+		    reduceType : sortOfTask;
 		  }
 
 (* There is only one job in a log file ? *)

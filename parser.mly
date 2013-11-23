@@ -29,9 +29,11 @@
 (*%token Token_Map Token_Reduce Token_Setup Token_Cleanup*)
 
 %token  Token_FinishTime Token_HostName
-%token Token_TaskStatus Token_Counters
+%token Token_TaskStatus  Token_Counters
+(*%token Token_StateString*)
+%token <LogTypes.resultTask> Token_Status
 
-%token  Token_Success Token_Killed
+(*%token  Token_Success Token_Killed*)
 
 
 %start <LogTypes.logFile> make_logfile
@@ -72,6 +74,9 @@ numEmptyProperty:
 taskProperty:
   | Token_TaskType Token_Equal Token_Quote x = Token_Task Token_Quote { x }
 
+statusProperty:
+  | Token_TaskStatus Token_Equal Token_Quote x = Token_Status Token_Quote {x}
+
 informations:
   (* After a Meta tag *)
   | numEmptyProperty { fun  tag logFile -> logFile } (* No information to add *)
@@ -106,11 +111,11 @@ informations:
       fun tag logFile -> logFile (* don't do anything *)
     }
     (* Info about launch time and number of tasks *)
-  | Token_JobId Token_Equal Token_Quote id = Token_Word Token_Quote
-    Token_LaunchTime Token_Equal Token_Quote launchTime = Token_Number Token_Quote
-    Token_TotalMaps Token_Equal Token_Quote nbTotalMaps = Token_Number Token_Quote
-    Token_TotalReduces Token_Equal Token_Quote nbTotalReduces = Token_Number Token_Quote
-    Token_Word Token_Equal Token_Quote Token_Word Token_Quote (* JobStatus *)
+  | id = property(Token_JobId) (*Token_JobId Token_Equal Token_Quote id = Token_Word Token_Quote*)
+    launchTime = numProperty(Token_LaunchTime) (* Token_LaunchTime Token_Equal Token_Quote launchTime = Token_Number Token_Quote*)
+    nbTotalMaps = numProperty(Token_TotalMaps)
+    nbTotalReduces = numProperty(Token_TotalReduces)
+    emptyProperty (* JobStatus *)
     {
      fun  tag (LogFile(job, mapHashTable, reduceHashTable)) -> 
        LogFile({jobId = id ; (* Verify whether it is the same id *)
@@ -126,10 +131,10 @@ informations:
 	       mapHashTable,
 	       reduceHashTable)
     }
-  | Token_TaskId Token_Equal  Token_Quote id = Token_Word Token_Quote 
-    Token_TaskType Token_Equal Token_Quote taskType = Token_Word Token_Quote
-    Token_StartTime Token_Equal Token_Quote startTime = Token_Number Token_Quote
-    Token_Splits Token_Equal Token_Quote place = Token_Word Token_Quote
+  | id = property(Token_TaskId) (*Token_TaskId Token_Equal  Token_Quote id = Token_Word Token_Quote *)
+    taskType = taskProperty (*Token_TaskType Token_Equal Token_Quote taskType = Token_Task Token_Quote*)
+    startTime = numProperty(Token_StartTime) (*Token_StartTime Token_Equal Token_Quote startTime = Token_Number Token_Quote*)
+    place = property(Token_Splits) 
     {
       (*fun tag (LogFile(job, mapHashTable, reduceHashTable)) -> 
 	if tag <> Task 
@@ -150,8 +155,7 @@ informations:
       (* Does nothing ; the interesting information for us are  *Attempt*)
       fun tag logFile -> logFile
     }
-      (* For map and reduce attempts*)
-      (* TODO : see how to handle Token_Setup Token_Task ... *)
+  (* For map and reduce attempts*)
   | taskProperty (* Token_TaskType Token_Equal Token_Quote x = Token_Task Token_Quote*)
     taskId = property(Token_TaskId)
     taskAttemptId = property(Token_TaskAttemptId)
@@ -173,7 +177,7 @@ informations:
 			       mapHost = mapTask.mapHost ; 
 			       mapDataDistribution = mapTask.mapDataDistribution;
 			       mapStatus = mapTask.mapStatus;
-			       mapType = mapTask.mapType;
+			       mapType = mapTask.mapType; (* Normal or speculated ? *)
 			     };
 			   LogFile(job, mapHashTable,  reduceHashTable)	
 	  | ReduceAttempt -> let reduceTask = BatHashtbl.find_default reduceHashTable taskAttemptId (make_empty_reduceTask ()) in
@@ -196,8 +200,38 @@ informations:
 				 reduceType = reduceTask.reduceType;
 			       };
 			     LogFile(job, mapHashTable, reduceHashTable)
-			       
-    }	   
+	  | _ -> failwith "Invalid task"       
+    }
+  (* Finish time of MapAttempt etc *)
+  | taskProperty
+    taskId = property(Token_TaskId)
+    taskAttemptId = property(Token_TaskAttemptId)
+    status = statusProperty
+    finishTime = numProperty(Token_FinishTime)
+    hostname = property(Token_HostName)
+    emptyProperty (*STATE_STRING *)
+    emptyProperty (* COUNTERS : TODO parse counters *)
+    {
+      fun tag (LogFile(job, mapHashTable, reduceHashTable)) -> 
+	match tag with
+	  | MapAttempt ->  let mapTask = BatHashtbl.find_default mapHashTable taskAttemptId (make_empty_mapTask ()) in
+			   BatHashtbl.replace mapHashTable taskAttemptId  
+			     { jobId = job.jobId ;
+			       mapId = taskId ; (* Do some verification ? *)
+			       mapAttemptId = taskAttemptId;
+			       mapStartingTime = mapTask.mapStartingTime ; 
+			       mapFinishedTime =  finishTime;
+			       mapNbInputRecords = mapTask.mapNbInputRecords; (* from counters *)
+			       mapNbOutputRecords = mapTask.mapNbOutputRecords;
+			       mapHost = hostname ; 
+			       mapDataDistribution = mapTask.mapDataDistribution;
+			       mapStatus = status;
+			       mapType = mapTask.mapType;
+			     };
+			   LogFile(job, mapHashTable,  reduceHashTable)	
+	  | _ -> failwith "Invalid task"  (* Reduce attempts have other options (such as shuffle time *)
+
+    }
 				    
       
 

@@ -77,8 +77,10 @@ rule make_token = parse
   (* Tokens for reduce attempts *)
   | "ReduceAttempt" {Token_Tag(LogTypes.ReduceAttempt)}
   (* Tokens for results*)
-  | "SUCCESS" { Token_Success }
-  | "KILLED" {Token_Killed}
+  | "SUCCESS" { Token_Status(LogTypes.Success) }
+  | "KILLED" {Token_Status(LogTypes.Killed)}
+  | "FAILED" {Token_Status(LogTypes.Failed)}
+  (*| "STATE_STRING" { Token_StateString }*)
   (* Add info in Counters *) 
   | QUOTE {Token_Quote}
   | DOT {Token_Dot}

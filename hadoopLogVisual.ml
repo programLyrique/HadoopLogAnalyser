@@ -6,12 +6,12 @@ open Batteries
 
 (* the name of the file which contains the expressions *)
 let filename = Sys.argv.(1)
-      
+
+
+    
 let main () =
   let input = open_in filename in
   let filebuf = Lexing.from_input input in
- (* Utils.tokenize_all Lexer.make_token filebuf;
-  Lexing.flush_input filebuf;*)
   if (Array.length (Sys.argv)) >= 3
   then (if Sys.argv.(2) = "d" then
       Utils.tokenize_interp_all Lexer.make_token filebuf)
