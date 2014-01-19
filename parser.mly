@@ -58,7 +58,7 @@ logfile:
       fun logFile -> info tag logFile
     }
 
-(* Parametrized rule  *)
+(* Parametrized rules  *)
 property(Name):
   | Name Token_Equal Token_Quote x = Token_Word Token_Quote { x }
 
