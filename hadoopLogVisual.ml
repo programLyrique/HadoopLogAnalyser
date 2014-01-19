@@ -5,8 +5,6 @@
 open Batteries
 
 
-
-
     
 let main () =
   (* the name of the file which contains the expressions *)
@@ -23,7 +21,8 @@ let main () =
 	  Printf.printf "\nParsing\n";
 	  try
 	    let LogTypes.LogFile(job, _, _) = Parser.make_logfile Lexer.make_token filebuf in
-	    LogTypes.(Printf.printf "Job id = %s\n%!" job.jobId)
+	    (*LogTypes.(Printf.printf "Job id = %s\n%!" job.jobId)*)
+	    Printf.printf "%s\n" (Yojson.Basic.to_string (JsonExport.jobToJson job))
 	  with
 	    | Lexer.Error msg ->
 	      Printf.eprintf "%s%!" msg

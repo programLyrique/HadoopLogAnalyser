@@ -9,6 +9,7 @@ A tool to parse hadoop log files.
 - batteries included
 - ocamllex
 - menhir
+- yojson
 
 ## Compilation
 

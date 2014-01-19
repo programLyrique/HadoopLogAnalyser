@@ -53,7 +53,7 @@ logfile2:
 
 (* A line of a lof file *)
 logfile:
-   tag = Token_Tag  info = informations Token_Dot
+   tag = Token_Tag  info = information Token_Dot
     {
       fun logFile -> info tag logFile
     }
@@ -77,7 +77,7 @@ taskProperty:
 statusProperty:
   | Token_TaskStatus Token_Equal Token_Quote x = Token_Status Token_Quote {x}
 
-informations:
+information:
   (* After a Meta tag *)
   | numEmptyProperty { fun  tag logFile -> logFile } (* No information to add *)
   (* After a Job tag  : general info*)
@@ -152,7 +152,7 @@ informations:
 	mapStatus : resultTask;
 	mapType : typeTask
 	}*)
-      (* Does nothing ; the interesting information for us are  *Attempt*)
+      (* Does nothing ; the interesting information for us are  *Attempt *)
       fun tag logFile -> logFile
     }
   (* For map and reduce attempts*)
