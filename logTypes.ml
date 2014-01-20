@@ -47,7 +47,8 @@ type reduceTask = { jobId : string ;
 		    reduceType : sortOfTask;
 		  }
 
-(* There is only one job in a log file ? *)
+(* There is only one job in a log file.  
+string : id of the attempt *)
 type logFile = LogFile of job * (string, mapTask) Hashtbl.t * (string, reduceTask) Hashtbl.t
 		    
  (** Create the log file structure*)

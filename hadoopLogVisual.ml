@@ -18,11 +18,12 @@ let main () =
 	    Utils.tokenize_interp_all Lexer.make_token filebuf)
       else
 	begin
-	  Printf.printf "\nParsing\n";
+	  Printf.printf "\nParsing\n\n";
 	  try
-	    let LogTypes.LogFile(job, _, _) = Parser.make_logfile Lexer.make_token filebuf in
+	    let logFile = Parser.make_logfile Lexer.make_token filebuf in
 	    (*LogTypes.(Printf.printf "Job id = %s\n%!" job.jobId)*)
-	    Printf.printf "%s\n" (Yojson.Basic.to_string (JsonExport.jobToJson job))
+	    Printf.printf "%s\n"   (Yojson.Basic.pretty_to_string 
+				      (JsonExport.logFileToJson logFile))
 	  with
 	    | Lexer.Error msg ->
 	      Printf.eprintf "%s%!" msg
