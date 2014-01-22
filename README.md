@@ -14,8 +14,8 @@ A tool to parse hadoop log files.
 ## Compilation
 
  * `make` : build *hadoopLogVisual*
- * `grammar` : launch an interactive interpreter which takes tokens in input and checks whether there valid tokens of a Hadoop log file grammar
-* `tests` : unit tests
+ * `make grammar` : launch an interactive interpreter which takes tokens in input and checks whether there valid tokens of a Hadoop log file grammar
+* `make tests` : unit tests
 
 
 ## Usage
