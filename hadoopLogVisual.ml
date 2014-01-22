@@ -8,7 +8,7 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 You should have received a copy of the GNU General Public License along with this program. If not, see http://www.gnu.org/licenses/.*)
 
 
-(* Taken from the example in https://github.com/derdon/menhir-example/blob/master/calc.ml *)
+(* Adapted from the example in https://github.com/derdon/menhir-example/blob/master/calc.ml *)
 open Batteries
 
 
