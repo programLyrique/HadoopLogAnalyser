@@ -44,17 +44,17 @@ let jobToJson (job : job) =
 (** map to json*)
 let mapToJson (map : mapTask) =
   `Assoc [("jobid", `String map.jobId);
-	  ("mapid", `String map.mapId);
-	  ("mapattemptid", `String map.mapAttemptId);
-	  ("mapstartingtime", `Int map.mapStartingTime);
-	  ("mapfinishedtime", `Int map.mapFinishedTime);
-	  ("mapnbinputrecords", `Int map.mapNbInputRecords);
-	  ("mapnboutputrecords", `Int map.mapNbOutputRecords);
-	  ("maphost", `String map.mapHost);
-	  ("mapdatadistribution", 
+	  ("id", `String map.mapId);
+	  ("attemptid", `String map.mapAttemptId);
+	  ("startingtime", `Int map.mapStartingTime);
+	  ("finishedtime", `Int map.mapFinishedTime);
+	  ("nbinputrecords", `Int map.mapNbInputRecords);
+	  ("nboutputrecords", `Int map.mapNbOutputRecords);
+	  ("host", `String map.mapHost);
+	  ("datadistribution", 
 	   `List (List.map (fun a -> `String a)  map.mapDataDistribution));
-	  ("mapstatus", `String (Utils.status_pretty_printer map.mapStatus));
-	  ("maptype", 
+	  ("status", `String (Utils.status_pretty_printer map.mapStatus));
+	  ("type", 
 	   `String ((function Normal -> "normal" |  Speculated -> "speculated") 
 	     map.mapType))
 	 ]
@@ -62,21 +62,21 @@ let mapToJson (map : mapTask) =
 (** reduce to json*)
 let reduceToJson (reduce : reduceTask) =
   `Assoc [("jobid", `String reduce.jobId);
-	  ("reduceid", `String reduce.reduceId);
-	  ("reduceattemptid", `String reduce.reduceAttemptId);
-	  ("reduceexecutiontime", `Int reduce.reduceExecutionTime);
-	  ("reducestartingtime", `Int reduce.reduceStartingTime);
-	  ("reduceshuffletime", `Int reduce.reduceShuffleTime);
-	  ("reducesorttime", `Int reduce.reduceSortTime);
-	  ("reducefinishedtime", `Int reduce.reduceFinishedTime);
-	  ("reducenbinputrecords", `Int reduce.reduceNbInputRecords);
-	  ("reducenboutputrecords", `Int reduce.reduceNbOutputRecords);
-	  ("reduceshufflebytes", `Int reduce. reduceShuffleBytes);
-	  ("reduceinputgroups", `Int reduce.reduceInputGroups);
-	  ("reducebytesread", `Int reduce.reduceBytesRead);
-	  ("reducehost", `String reduce.reduceHost);
-	  ("reducestatus", `String (Utils.status_pretty_printer reduce.reduceStatus));
-	  ("reducetype", 
+	  ("id", `String reduce.reduceId);
+	  ("attemptid", `String reduce.reduceAttemptId);
+	  ("executiontime", `Int reduce.reduceExecutionTime);
+	  ("startingtime", `Int reduce.reduceStartingTime);
+	  ("shuffletime", `Int reduce.reduceShuffleTime);
+	  ("sorttime", `Int reduce.reduceSortTime);
+	  ("finishedtime", `Int reduce.reduceFinishedTime);
+	  ("nbinputrecords", `Int reduce.reduceNbInputRecords);
+	  ("nboutputrecords", `Int reduce.reduceNbOutputRecords);
+	  ("shufflebytes", `Int reduce. reduceShuffleBytes);
+	  ("inputgroups", `Int reduce.reduceInputGroups);
+	  ("bytesread", `Int reduce.reduceBytesRead);
+	  ("host", `String reduce.reduceHost);
+	  ("status", `String (Utils.status_pretty_printer reduce.reduceStatus));
+	  ("type", 
 	   `String ((function Normal -> "normal" |  Speculated -> "speculated") 
 	     reduce.reduceType))
 	 ]
