@@ -66,10 +66,10 @@ numProperty(Name):
   | Name Token_Equal Token_Quote x = Token_Number Token_Quote { x }
 
 emptyProperty:
-  | Token_Word Token_Equal Token_Quote Token_Word Token_Quote {}
+  | Token_Word Token_Equal Token_Quote Token_Word? Token_Quote {}
 
 numEmptyProperty:
-  | Token_Word Token_Equal Token_Quote Token_Number Token_Quote {}
+  | Token_Word Token_Equal Token_Quote Token_Number? Token_Quote {}
 
 taskProperty:
   | Token_TaskType Token_Equal Token_Quote x = Token_Task Token_Quote { x }
@@ -77,13 +77,17 @@ taskProperty:
 statusProperty:
   | Token_TaskStatus Token_Equal Token_Quote x = Token_Status Token_Quote {x}
 
-(* Temporary rule : will be transformed to parse the counters*)
-countersProperty:
+(* Temporary rulse : will be transformed to parse the counters*)
+mapCountersProperty:
   |Token_Counters Token_Equal Token_Quote
-      Token_Word Token_Word Token_Word Token_Word Token_Word Token_Word Token_Word Token_Word Token_Word Token_Word
-      Token_Word Token_Word Token_Word Token_Word Token_Word Token_Word Token_Word Token_Word Token_Word Token_Word
-      Token_Word Token_Word Token_Word Token_Word Token_Word Token_Word Token_Word Token_Word Token_Word Token_Word
-      Token_Word Token_Word Token_Word Token_Word Token_Word Token_Word
+      Token_Word*
+      Token_Quote
+      {}
+
+
+reduceCountersProperty:
+  | Token_Counters Token_Equal Token_Quote
+      Token_Word*
       Token_Quote
       {}
 
@@ -220,7 +224,7 @@ information:
     finishTime = numProperty(Token_FinishTime)
     hostname = property(Token_HostName)
     emptyProperty (*STATE_STRING *)
-    countersProperty (* COUNTERS : TODO parse counters *)
+    mapCountersProperty (* COUNTERS : TODO parse counters *)
     {
       fun tag (LogFile(job, mapHashTable, reduceHashTable)) -> 
 	match tag with
@@ -242,7 +246,47 @@ information:
 	  | _ -> failwith "Invalid task"  (* Reduce attempts have other options (such as shuffle time *)
 
     }
-(* *)
+  (* TODO : handle case with ERROR token*)
+   (*Reduce Attempt with counters*)
+  | taskProperty
+    taskId = property(Token_TaskId)
+    taskAttemptId = property(Token_TaskAttemptId)
+    status = statusProperty
+    shuffleFinishTime = numProperty(Token_Word)
+    sortFinishTime = numProperty(Token_Word)
+    finishTime = numProperty(Token_FinishTime)
+    hostname = property(Token_HostName)
+    Token_Word Token_Equal Token_Quote Token_Word Token_Word Token_Word Token_Quote (*STATE_STRING *)
+    reduceCountersProperty (* COUNTERS : TODO parse counters *)
+    {
+      fun tag (LogFile(job, mapHashTable, reduceHashTable)) -> 
+	match tag with
+	  | ReduceAttempt ->   let reduceTask = BatHashtbl.find_default reduceHashTable taskAttemptId (make_empty_reduceTask ()) in
+			       BatHashtbl.replace reduceHashTable taskAttemptId 
+				 { jobId = job.jobId ;
+				   reduceId = taskId ;
+				   reduceAttemptId = taskAttemptId ;
+				   reduceExecutionTime = reduceTask.reduceExecutionTime ;
+				   reduceStartingTime = reduceTask.reduceStartingTime ;
+				   reduceShuffleTime = shuffleFinishTime ;
+				   reduceSortTime = sortFinishTime ;
+				   reduceFinishedTime = finishTime;
+				   reduceNbInputRecords = reduceTask.reduceNbInputRecords;
+				   reduceNbOutputRecords = reduceTask.reduceNbOutputRecords;
+				   reduceShuffleBytes = reduceTask.reduceShuffleBytes;
+				   reduceInputGroups = reduceTask.reduceInputGroups;
+				   reduceBytesRead = reduceTask.reduceBytesRead;
+				   reduceHost = hostname ;
+				   reduceStatus = status;
+				   reduceType = reduceTask.reduceType;
+				 };
+			       LogFile(job, mapHashTable, reduceHashTable)
+	  | _ -> failwith "Invalid task"
+    }
+
+
+
+      
 				    
       
 
