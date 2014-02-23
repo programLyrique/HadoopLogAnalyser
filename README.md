@@ -5,11 +5,11 @@ A tool to parse hadoop log files.
 
 ## Dependencies
 
-- ocaml
-- batteries included
+- ocaml (>= 4.0 )
+- batteries included (>= 2.1)
 - ocamllex
-- menhir
-- yojson
+- menhir (>= 20130116)
+- yojson (>= 1.18)
 
 ## Compilation
 
