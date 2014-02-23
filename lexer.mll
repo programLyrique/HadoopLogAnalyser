@@ -36,7 +36,7 @@ let RIGHTBRACE = '}'
 let DELIMITER = RIGHTPAR | LEFTPAR | RIGHTBRACK | LEFTBRACK | RIGHTBRACE | LEFTBRACE
 
 (* Miscellaneous characters *)
-let MISCHAR = ['\\'  '_'  '/'  '-'  '$'  '.' ':' '*'] 
+let MISCHAR = ['\\'  '_'  '/'  '-'  '$'  '.' ':' '*' '+'] 
 
 let SPACE = ' '
 

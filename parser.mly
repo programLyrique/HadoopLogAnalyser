@@ -77,6 +77,16 @@ taskProperty:
 statusProperty:
   | Token_TaskStatus Token_Equal Token_Quote x = Token_Status Token_Quote {x}
 
+(* Temporary rule : will be transformed to parse the counters*)
+countersProperty:
+  |Token_Counters Token_Equal Token_Quote
+      Token_Word Token_Word Token_Word Token_Word Token_Word Token_Word Token_Word Token_Word Token_Word Token_Word
+      Token_Word Token_Word Token_Word Token_Word Token_Word Token_Word Token_Word Token_Word Token_Word Token_Word
+      Token_Word Token_Word Token_Word Token_Word Token_Word Token_Word Token_Word Token_Word Token_Word Token_Word
+      Token_Word Token_Word Token_Word Token_Word Token_Word Token_Word
+      Token_Quote
+      {}
+
 information:
   (* After a Meta tag *)
   | numEmptyProperty { fun  tag logFile -> logFile } (* No information to add *)
@@ -210,7 +220,7 @@ information:
     finishTime = numProperty(Token_FinishTime)
     hostname = property(Token_HostName)
     emptyProperty (*STATE_STRING *)
-    emptyProperty (* COUNTERS : TODO parse counters *)
+    countersProperty (* COUNTERS : TODO parse counters *)
     {
       fun tag (LogFile(job, mapHashTable, reduceHashTable)) -> 
 	match tag with
@@ -232,6 +242,7 @@ information:
 	  | _ -> failwith "Invalid task"  (* Reduce attempts have other options (such as shuffle time *)
 
     }
+(* *)
 				    
       
 
