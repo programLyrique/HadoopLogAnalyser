@@ -4,14 +4,26 @@
 
 open Batteries
 open Parser
+open Lexing
 
 exception Error of string
 
+(** Update num of line.
+@author Real world OCaml 
+*)
+let next_line lexbuf =
+  let pos = lexbuf.lex_curr_p in
+  lexbuf.lex_curr_p <-
+    { pos with pos_bol = lexbuf.lex_curr_pos;
+               pos_lnum = pos.pos_lnum + 1
+    }
+
 }
 
-let BLANK = [' ' '\t' '\n']
+let BLANK = [' ' '\t' ]
 
-let LINE = [^ '\n']* '\n'
+(*let LINE = [^ '\n']* '\n'*)
+let LINE = '\n'
 
 let NUM = ['0'-'9']
 let ALPHA =  ['a'-'z' 'A'-'Z' '-' '_' ]
@@ -36,7 +48,7 @@ let RIGHTBRACE = '}'
 let DELIMITER = RIGHTPAR | LEFTPAR | RIGHTBRACK | LEFTBRACK | RIGHTBRACE | LEFTBRACE
 
 (* Miscellaneous characters *)
-let MISCHAR = ['\\'  '_'  '/'  '-'  '$'  '.' ':' '*' '+' '>'] 
+let MISCHAR = ['\\'  '_'  '/'  '-'  '$'  '.' ':' '*' '+' '>' ','] 
 
 let SPACE = ' '
 
@@ -100,6 +112,7 @@ rule make_token = parse
 	let s = Lexing.lexeme lexbuf 
 	in Token_Ident(s)
       }
+  | LINE { next_line lexbuf ; make_token lexbuf }
   | BLANK {make_token lexbuf}
   | _ as c (* Default case : skip the character *)
       {

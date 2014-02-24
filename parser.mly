@@ -60,7 +60,7 @@ logfile:
 
 (* Parametrized rules  *)
 property(Name):
-  | Name Token_Equal Token_Quote x = Token_Word Token_Quote { x }
+  | Name Token_Equal Token_Quote x = Token_Word? Token_Quote { match x with None -> "" | Some s -> s  }
 
 numProperty(Name):
   | Name Token_Equal Token_Quote x = Token_Number Token_Quote { x }
@@ -118,13 +118,13 @@ information:
 	 mapHashTable,
 	 reduceHashTable)
     }
-  (* Info about priority of the job *)
+  (* After a job tag ; info about priority of the job *)
   | property(Token_JobId) (*Token_JobId Token_Equal Token_Quote id = Token_Word Token_Quote*)
     emptyProperty (*Token_Word Token_Equal Token_Quote Token_Word Token_Quote*)
     {
       fun tag logFile -> logFile (* don't do anything *)
     }
-    (* Info about launch time and number of tasks *)
+    (* After a job tag ; info about launch time and number of tasks *)
   | id = property(Token_JobId) (*Token_JobId Token_Equal Token_Quote id = Token_Word Token_Quote*)
     launchTime = numProperty(Token_LaunchTime) (* Token_LaunchTime Token_Equal Token_Quote launchTime = Token_Number Token_Quote*)
     nbTotalMaps = numProperty(Token_TotalMaps)
@@ -144,30 +144,6 @@ information:
 		nbSuccessSpecReduces =  job.nbSuccessSpecReduces},
 	       mapHashTable,
 	       reduceHashTable)
-    }
-  | id = property(Token_TaskId) (*Token_TaskId Token_Equal  Token_Quote id = Token_Word Token_Quote *)
-    taskType = taskProperty (*Token_TaskType Token_Equal Token_Quote taskType = Token_Task Token_Quote*)
-    startTime = numProperty(Token_StartTime) (*Token_StartTime Token_Equal Token_Quote startTime = Token_Number Token_Quote*)
-    place = property(Token_Splits) 
-    {
-      (*fun tag (LogFile(job, mapHashTable, reduceHashTable)) -> 
-	if tag <> Task 
-	then logFile
-	else 
-	LogFile(job,
-	{ jobId = job.jobId ;
-	mapId = id ; 
-	mapStartingTime =  ; 
-	mapFinishedTime : int ;
-	mapNbInputRecords : int;
-	mapNbOutputRecords : int;
-	mapHost : string ; 
-	mapDataDistribution : string list;
-	mapStatus : resultTask;
-	mapType : typeTask
-	}*)
-      (* Does nothing ; the interesting information for us are  *Attempt *)
-      fun tag logFile -> logFile
     }
   (* For map and reduce attempts*)
   | taskProperty (* Token_TaskType Token_Equal Token_Quote x = Token_Task Token_Quote*)
@@ -283,7 +259,41 @@ information:
 			       LogFile(job, mapHashTable, reduceHashTable)
 	  | _ -> failwith "Invalid task"
     }
-
+    (* After a task tag*)
+  | id = property(Token_TaskId) (*Token_TaskId Token_Equal  Token_Quote id = Token_Word Token_Quote *)
+    taskType = taskProperty (*Token_TaskType Token_Equal Token_Quote taskType = Token_Task Token_Quote*)
+    startTime = numProperty(Token_StartTime) (*Token_StartTime Token_Equal Token_Quote startTime = Token_Number Token_Quote*)
+    place = property(Token_Splits) 
+    {
+      (*fun tag (LogFile(job, mapHashTable, reduceHashTable)) -> 
+	if tag <> Task 
+	then logFile
+	else 
+	LogFile(job,
+	{ jobId = job.jobId ;
+	mapId = id ; 
+	mapStartingTime =  ; 
+	mapFinishedTime : int ;
+	mapNbInputRecords : int;
+	mapNbOutputRecords : int;
+	mapHost : string ; 
+	mapDataDistribution : string list;
+	mapStatus : resultTask;
+	mapType : typeTask
+	}*)
+      (* Does nothing ; the interesting information for us are  *Attempt *)
+      fun tag logFile -> logFile
+    }
+    (* After a task tag *)
+  | id = property(Token_TaskId) (*Token_TaskId Token_Equal  Token_Quote id = Token_Word Token_Quote *)
+    taskType = taskProperty (*Token_TaskType Token_Equal Token_Quote taskType = Token_Task Token_Quote*)
+    status = statusProperty
+    finishTime = numProperty(Token_FinishTime)
+    Token_Counters Token_Equal Token_Quote list(Token_Word) Token_Quote (* Handles both reduce and map tasks ; should be separated between the two when parsing 
+			more precisely the information*)
+    {
+      fun tag logFile -> logFile
+    }
 
 
       
